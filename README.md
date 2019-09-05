@@ -1,7 +1,7 @@
 "# L1TOS" 
-L1TOS Consolidated Feed Reader
+<H1>L1TOS Consolidated Feed Reader
 Technical Overview Documentation
-Date: September 5, 2019				Version: 1.0
+Date: September 5, 2019				Version: 1.0</H1>
 Overview
 This documentation is a high level overview of the L1TOS (Level 1 and Time Of Sale) consolidated feed reader and describes how to install, run, and modify the trade utility. This utlity was written to give traders a tool to make better trading decisions.
 This tool consolidates the Level 1 quotes (L1) with all Time of Sale (TOS) trade transactions and keeps a running tally on how many trades where traded at the current L1 bid price and how many trades where traded at the current L1 ask price within a given 1 minute time interval.
