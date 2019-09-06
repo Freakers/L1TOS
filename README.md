@@ -1,8 +1,8 @@
 "# L1TOS" 
 <H1>L1TOS Consolidated Feed Reader</H1>
-<H1>Technical Overview Documentation</H1>
-<H1>Date: September 5, 2019				Version: 1.0</H1>
-<H2>Overview</H2>
+<H2>Technical Overview Documentation</H2>
+<H2>Date: September 5, 2019				Version: 1.0</H2>
+<H3Overview</H3>
 <p>This documentation is a high level overview of the L1TOS (Level 1 and Time Of Sale) consolidated feed reader and describes how to install, run, and modify the trade utility. This utlity was written to give traders a tool to make better trading decisions.
 This tool consolidates the Level 1 quotes (L1) with all Time of Sale (TOS) trade transactions and keeps a running tally on how many trades where traded at the current L1 bid price and how many trades where traded at the current L1 ask price within a given 1 minute time interval.</p>
 <p>The L1TOS allows a trader to see the current trading sentiment and if it is biased towards buyers or sellers which allows the trader to quickly identify a trading bias in fast changing markets such as the S&P500 or highly active stocks within the NYSE and Nasdaq Stock Exchange.</p>  
@@ -23,7 +23,7 @@ The following is the quick start instructions to get you up and running quickly.
 7) Install pip by typing: py get-pip.py (takes a while)
 8) Install twisted library type py pip install twisted
 
-This should get you started.
+<p> This should get you started.
 To start the L1 Time of Sale Feed Reader type the following on the command line:
 py L1TOS.py
 This will start the feed reader with the default symbol set to ES\U19.CM. 
