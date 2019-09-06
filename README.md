@@ -24,8 +24,7 @@ The following is the quick start instructions to get you up and running quickly.
 8) Install twisted library type py pip install twisted
 
 <p> This should get you started.
-To start the L1 Time of Sale Feed Reader type the following on the command line:
-py L1TOS.py
+To start the L1 Time of Sale Feed Reader type the following on the command line: PY L1TOS.py
 </p>
 <p>
 This will start the feed reader with the default symbol set to ES\U19.CM. 
@@ -33,8 +32,7 @@ If you want to watch a specific symbol it must be first placed into the file cal
 </p>
 <p>
 Add the symbol in the file (example add WORK.NY) and save the file. 
-Start the LITOS program by typing the following:
-py L1TOS WORK.NY
+Start the LITOS program by typing the following: PY L1TOS WORK.NY
 </p>
 <p>
 Also gave you the TSXClosingImbalance.py program which reports the daily MOC and associated TSX closing prices for each MOC eligible stock that day. 
