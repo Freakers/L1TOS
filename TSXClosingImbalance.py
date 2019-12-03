@@ -70,7 +70,7 @@ class mocsymbols:
         with urllib.request.urlopen('http://localhost:8080/SetOutput?symbol=' + symbol +
                                     '&feedtype=' + feedType + '&output=' + output + '&status=off') as response0:
             html0: object = response0.read()
-            #print("Deregister Symbol Response : " + html0.__str__())
+            print("Deregister Symbol Response : " + html0.__str__())
         with urllib.request.urlopen('http://localhost:8080/Deregister?symbol=' + symbol + '&region=' + region +
                                     '&feedtype=' + feedType) as response1:
             html1: object = response1.read()
@@ -156,7 +156,7 @@ class SnapShot:
 class TOSFileReader:
     """Create Time of Sale Feed Reader PPro8 API, Reads log file created by the Register Class"""
     def __init__(self):
-        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Ekeko\\TOS_1.log", "r")
+        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_1.log", "r")
         while 1:
             where = file.tell()
             line = file.readline()
@@ -297,7 +297,8 @@ class TSXClosingImbalance:
         symbols = {}
         """Load the Imbalance File for Parsing into the imbalancerecord(s) data dictionaries"""
         print("Start Load Imbalance File: "+time.asctime())
-        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Haya\\IMBAL_CIRC_1.log", "r")
+        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\IMBAL_CIRC_1.log", "r")
+        mocrpt = open("C:\\logs\\MOCReport.txt", "w")
         recordcount = 1
         imbalancerecords = {}
         for record in file:
@@ -328,6 +329,13 @@ class TSXClosingImbalance:
                           "\tVolume: " + imbalancerecords[key]['Volume'].ljust(9) +
                           "\tAuctionPrice: " + imbalancerecords[key]['AuctionPrice'] +
                           "\tTradeValue: " + format(float(imbalancerecords[key]['AuctionPrice']) * float(int(imbalancerecords[key]['Volume'])), ',.2f'))
+                    mocrpt.write("Market Time: " + imbalancerecords[key]['MarketTime'] +
+                          "\tSymbol: " + imbalancerecords[key]['Symbol'].ljust(10) +
+                          "\tMarket: " + imbalancerecords[key]['Source'] +
+                          "\tSide: " + imbalancerecords[key]['Side'].ljust(4) +
+                          "\tVolume: " + imbalancerecords[key]['Volume'].ljust(9) +
+                          "\tAuctionPrice: " + imbalancerecords[key]['AuctionPrice'] +
+                          "\tTradeValue: " + format(float(imbalancerecords[key]['AuctionPrice']) * float(int(imbalancerecords[key]['Volume'])), ',.2f'))
                     moc_dict['MarketTime'] = imbalancerecords[key]['MarketTime']
                     moc_dict['Symbol'] = imbalancerecords[key]['Symbol']
                     moc_dict['Side'] = imbalancerecords[key]['Side']
@@ -346,6 +354,13 @@ class TSXClosingImbalance:
                           "\tVolume: " + imbalancerecords[key]['Volume'].ljust(9) +
                           "\tAuctionPrice: " + imbalancerecords[key]['AuctionPrice'] +
                           "\tTradeValue: " + format(float(imbalancerecords[key]['AuctionPrice']) * float(int(imbalancerecords[key]['Volume'])), ',.2f'))
+                    mocrpt.write("Market Time: " + imbalancerecords[key]['MarketTime'] +
+                                 "\tSymbol: " + imbalancerecords[key]['Symbol'].ljust(10) +
+                                 "\tMarket: " + imbalancerecords[key]['Source'] +
+                                 "\tSide: " + imbalancerecords[key]['Side'].ljust(4) +
+                                 "\tVolume: " + imbalancerecords[key]['Volume'].ljust(9) +
+                                 "\tAuctionPrice: " + imbalancerecords[key]['AuctionPrice'] +
+                                 "\tTradeValue: " + format(float(imbalancerecords[key]['AuctionPrice']) * float(int(imbalancerecords[key]['Volume'])), ',.2f'))
                     moc_dict['MarketTime'] = imbalancerecords[key]['MarketTime']
                     moc_dict['Symbol'] = imbalancerecords[key]['Symbol']
                     moc_dict['Side'] = imbalancerecords[key]['Side']
@@ -356,6 +371,7 @@ class TSXClosingImbalance:
                     recordcount = recordcount + 1
                     #SellMarketOrder(imbalancerecords[key]['Symbol'], "100")
         # Load Moc Symbols and Register Time of Sale for each imbalance record
+        mocrpt.close()
         m = mocsymbols(symbols)
         n = datetime.now()
         while datetime(n.year, n.month, n.day,n.hour, n.minute, n.second).time() \
@@ -366,8 +382,8 @@ class TSXClosingImbalance:
         print("Collecting TOS Snapshot at " + datetime(n.year, n.month, n.day,n.hour, n.minute, n.second).time().__str__())
         if not os.path.exists("C:\\logs\\" + n.date().__str__()):
             os.makedirs("C:\\logs\\" + n.date().__str__())
-        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Haya\\IMBAL_CIRC_1.log", "C:\\logs\\" + n.date().__str__())
-        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Haya\\TOS_1.log", "C:\\logs\\" + n.date().__str__())
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\IMBAL_CIRC_1.log", "C:\\logs\\" + n.date().__str__())
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_1.log", "C:\\logs\\" + n.date().__str__())
 
 
 class SubmitMarketOrder:
@@ -545,7 +561,7 @@ class ppro_datagram(DatagramProtocol):
 # Unit Test - Register symbol GS.TO for Level 2 quotes and write the L2 data to the default L2 file
 # bytype = defaults to file in PPro8
 # 9999 = defaults to a UDP port
-#GS_L2_UDP = RegisterSymbol("GS.TO", "L2", "5555")
+#GS_L2_UDP = RegisterSymbol("GS.TO", "L2", "5556")
 
 # Unit Test - Register symbol GS.TO for Level 2 quotes and write the L2 data to the default L2 file
 #GS_TOS  = RegisterSymbol("GS.TO", "TOS")
@@ -599,11 +615,11 @@ class ppro_datagram(DatagramProtocol):
 
 #test = SellMarketOrder("ACB.TO", "100")
 
-#L1=RegisterSymbol("CRON.TO", "L1", "5555")
+#L1=RegisterSymbol("CRON.TO", "L1", "5556")
 
-#TOS = RegisterSymbol("_STW60.E1", "TOS", "5555")
+#TOS = RegisterSymbol("_STW60.E1", "TOS", "5556")
 
-#reactor.listenUDP(5555, ppro_datagram())
+#reactor.listenUDP(5556, ppro_datagram())
 
 #reactor.run()
 
@@ -623,9 +639,9 @@ class ppro_datagram(DatagramProtocol):
 # Create data folder and store MOC report and all data
 n = datetime.now()
 print(n.year.__str__()+n.month.__str__()+n.day.__str__())
-pause.until(datetime(n.year, n.month, n.day, 15, 35, 0, 0))
+pause.until(datetime(n.year, n.month, n.day, 15, 30, 0, 0))
 step1 = RegisterImbalance()
-pause.until(datetime(n.year, n.month, n.day, 15, 40, 0, 0))
+pause.until(datetime(n.year, n.month, n.day, 15, 40, 5, 0))
 step2 = TSXClosingImbalance.loadfile(10000000.00, ".TO")
 step3 = ImbalanceFileReader()
 
