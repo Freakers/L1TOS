@@ -65,7 +65,7 @@ class Symbols:
             print(symbol + " : "+feedtype+" : "+output)
             t = threading.Thread(target=self.registersymbol, args=(symbol, feedtype, output,))
             t.start()
-            pause.sleep(0.05)
+            pause.sleep(0.2)
 
     def registersyms(self, feedtype="TOS", output="bytype"):
         print("Starting THREADS to register L1 AND TOS for Symbol List")
@@ -128,29 +128,31 @@ class Symbols:
         return self.symbols.items().__len__()
 
     def movedata(self, feed, file, hour, minute, sec):
-        pause.until(datetime(n.year, n.month, n.day, 12, 00, 00, 0))
         dte = datetime.now()
         pause.until(datetime(n.year, n.month, n.day, hour, minute, sec, 0))
         if not os.path.exists("C:\\logs\\" + dte.year.__str__() +
                               "-" + dte.month.__str__() + "-" + dte.day.__str__().rjust(2, "0")):
             os.mkdir("C:\\logs\\" + dte.year.__str__() + "-" + dte.month.__str__() + "-" + dte.day.__str__().rjust(2, "0"))
-        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\" + feed, "C:\\logs\\" + dte.year.__str__() +
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\" + feed, "C:\\logs\\" + dte.year.__str__() + 
                     "-" + dte.month.__str__() + "-" + dte.day.__str__().rjust(2, "0") + "\\" + file)
+
+    def collect_euro_close(self):
+        test_Milan = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Milan.csv", "TOS", "bytype", "file")
+        test_Amsterdam = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Amsterdam.csv", "TOS", "bytype", "file")
+        test_Brusells = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Brussels.csv", "TOS", "bytype", "file")
+        test_Lisbon = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Lisbon.csv", "TOS", "bytype", "file")
+        test_Paris = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Paris.csv", "TOS", "bytype", "file")
+        pause.until(datetime(n.year, n.month, n.day, 11, 40, 00, 0))
+        if not os.path.exists("C:\\logs\\"+n.year.__str__()+"-"+n.month.__str__()+"-"+n.day.__str__().rjust(2, "0")):
+            os.mkdir("C:\\logs\\"+n.year.__str__()+"-"+n.month.__str__()+"-"+n.day.__str__().rjust(2, "0"))
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_2.log", "C:\\logs\\"+n.year.__str__() +
+                    "-" + n.month.__str__() + "-" + n.day.__str__().rjust(2, "0") + "\\Europe.csv")
 
 n = datetime.now()
 print(n.year.__str__()+n.month.__str__()+n.day.__str__())
-# test_Milan = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Milan.csv", "TOS", "bytype", "file")
-# test_Amsterdam = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Amsterdam.csv", "TOS", "bytype", "file")
-# test_Brusells = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Brussels.csv", "TOS", "bytype", "file")
-# test_Lisbon = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Lisbon.csv", "TOS", "bytype", "file")
-# test_Paris = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Paris.csv", "TOS", "bytype", "file")
-test_NASDAQ = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Nasdaq.csv", "TOS", "bytype", "file")
+test_NASDAQ = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\NQ.csv", "TOS", "bytype", "file")
 #test_NYSE = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Nyse.csv", "TOS", "bytype", "file")
 # test_symbols = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Symbols.csv", "TOS", "bytype", "file")
 # test_symbols.listsymbols()
-# pause.until(datetime(n.year, n.month, n.day, 11, 40, 00, 0))
-# if not os.path.exists("C:\\logs\\"+n.year.__str__()+"-"+n.month.__str__()+"-"+n.day.__str__().rjust(2, "0")):
-#     os.mkdir("C:\\logs\\"+n.year.__str__()+"-"+n.month.__str__()+"-"+n.day.__str__().rjust(2, "0"))
-# shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_2.log", "C:\\logs\\"+n.year.__str__() +
-#             "-" + n.month.__str__() + "-" + n.day.__str__().rjust(2, "0") + "\\Europe.csv")
-# # test_NASDAQ.movedata("TOS_1", "Europe.log", "12", "22", "00")
+pause.until(datetime(n.year, n.month, n.day, 14, 00, 00, 0))
+test_NASDAQ.movedata("TOS_1.log", "nq.log", 14, 20, 00)
