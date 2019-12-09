@@ -5,7 +5,6 @@ import time
 import threading
 import datetime
 from typing import Counter
-
 from twisted.internet import reactor
 from twisted.internet.protocol import DatagramProtocol
 
@@ -90,7 +89,7 @@ class OrderEvents:
 
     def __init__(self):
         self.LocalTime = ""
-        self.Messaage = ""
+        self.Message = ""
         self.MarketDateTime = ""
         self.OrderNumber = ""
         self.OriginatorSeqId = ""
@@ -102,11 +101,11 @@ class OrderEvents:
         self.Description = ""
         self.OrderEvent = {}
 
-    def update(self, localtime, msg, msgtime, ordnum, orginatorseqid, eventmsgtype, eventflavour, eventorginatorid,
+    def update(self, localtime, message, msgtime, ordnum, orginatorseqid, eventmsgtype, eventflavour, eventorginatorid,
                price, size, description):
         msg = {}
         msg['LocalTime'] = localtime
-        msg['Message'] = msg
+        msg['Message'] = message
         msg['MarketDateTime'] = msgtime
         msg['OrderNumber'] = ordnum
         msg['EventMessageType'] = eventmsgtype
@@ -544,7 +543,7 @@ print("sys.argv.count = "+len(sys.argv).__str__())
 if len(sys.argv) > 1:
     my_symbol = sys.argv[1].__str__()
     print("\nStarting L1TOS monitor for symbol: " + my_symbol.__str__())
-Symbols(my_symbol)
+x = Symbols(my_symbol)
 # Load and register symbols of intrest
 # Symbols("C:\\logs\Symbols.txt")
 #SP500 11 Sectors
