@@ -314,7 +314,7 @@ class TSXClosingImbalance:
         symbols = {}
         """Load the Imbalance File for Parsing into the imbalancerecord(s) data dictionaries"""
         print("Start Load Imbalance File: "+time.asctime())
-        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Haya\\IMBAL_CIRC_1.log", "r")
+        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\IMBAL_CIRC_1.log", "r")
         recordcount = 1
         imbalancerecords = {}
         for record in file:
@@ -383,8 +383,8 @@ class TSXClosingImbalance:
         print("Collecting TOS Snapshot at " + datetime(n.year, n.month, n.day,n.hour, n.minute, n.second).time().__str__())
         if not os.path.exists("C:\\logs\\" + n.date().__str__()):
             os.makedirs("C:\\logs\\" + n.date().__str__())
-        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Haya\\IMBAL_CIRC_1.log", "C:\\logs\\" + n.date().__str__())
-        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Haya\\TOS_1.log", "C:\\logs\\" + n.date().__str__())
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\IMBAL_CIRC_1.log", "C:\\logs\\" + n.date().__str__())
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_1.log", "C:\\logs\\" + n.date().__str__())
 
 
 class SubmitMarketOrder:
@@ -640,9 +640,9 @@ class ppro_datagram(DatagramProtocol):
 # Create data folder and store MOC report and all data
 n = datetime.now()
 print(n.year.__str__()+n.month.__str__()+n.day.__str__())
-#pause.until(datetime(n.year, n.month, n.day, 15, 35, 0, 0))
-#step1 = RegisterImbalance()
-#pause.until(datetime(n.year, n.month, n.day, 15, 40, 0, 0))
-#step2 = TSXClosingImbalance.loadfile(1000000.00, ".TO")
+pause.until(datetime(n.year, n.month, n.day, 15, 35, 0, 0))
+step1 = RegisterImbalance()
+pause.until(datetime(n.year, n.month, n.day, 15, 40, 15, 0))
+step2 = TSXClosingImbalance.loadfile(10000000.00, ".TO")
 step3 = ImbalanceFileReader()
 
