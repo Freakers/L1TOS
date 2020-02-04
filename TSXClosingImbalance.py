@@ -100,12 +100,11 @@ class RegisterSymbol:
 class RegisterImbalance:
     """Registers a single symbol in PPro8 API"""
     def __init__(self):
-        print("Rergister Imbalance")
-        print('API - Register Imbalance Request  : ' +
+        print('PPro8-API : Register Imbalance Request  : ' +
               'http://localhost:8080/Register?region=1&feedtype=IMBALANCE&output=bytype')
         with urllib.request.urlopen('http://localhost:8080/Register?region=1&feedtype=IMBALANCE&output=bytype') as response1:
             html1: object = response1.read()
-            print("API - Register Imbalance Response : " + html1.__str__())
+            print("PPro8-API : Register Imbalance Response : " + html1.__str__())
 
 
 class RegisterSymbols:
@@ -153,19 +152,17 @@ class SnapShot:
                 print("Snapshot Response: "+html1.__str__())
 
 
-class TOSFileReader:
+class TOSFile:
     """Create Time of Sale Feed Reader PPro8 API, Reads log file created by the Register Class"""
     def __init__(self):
-        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_1.log", "r")
-        while 1:
-            where = file.tell()
-            line = file.readline()
-            if not line:
-                time.sleep(1)
-                file.seek(where)
-            else:
-                print(line)
+        file = open("C:\\logs\\2019-12-27\\TOS_1.log", "r")
+        i = 0
+        for record in file:
+            tos_fields = record.split(",")
+            tos_price = tos_fields.pop(5).split('=').pop(1)
+            print(str(tos_price))
 
+        return None
 
 class registerSP500:
     def __init__(self, symbols={1: {'ticker': 'CRON.TO'}}):
@@ -202,7 +199,7 @@ class ImbalanceFileReader:
         tos = TOSFileReader()
         file = open("C:\\logs\\" + n.date().__str__() + "\\MOCImbalance.csv", "w")
         masterfile = open("C:\\logs\\master\\MOCImbalance.csv", "a")
-        file.write("Date;Symbol;Side;Shares;Price;Trade Value;Close Price; Net Share Profit\n")
+        file.write("Date;Symbol;Side;Shares;MOC Price;Trade Value;Close Price; Net Share Profit, Best Entry Price\n")
         for key, l1_symbols in l1_symbols.items():
             fields = l1_symbols.split(";")
             side = fields[1]
@@ -297,7 +294,7 @@ class TSXClosingImbalance:
         symbols = {}
         """Load the Imbalance File for Parsing into the imbalancerecord(s) data dictionaries"""
         print("Start Load Imbalance File: "+time.asctime())
-        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\IMBAL_CIRC_1.log", "r")
+        file = open("C:\\Program Files (x86)\\Ralota\\PPro8 Jawa\\IMBAL_CIRC_1.log", "r")
         mocrpt = open("C:\\logs\\MOCReport.txt", "w")
         recordcount = 1
         imbalancerecords = {}
@@ -382,64 +379,8 @@ class TSXClosingImbalance:
         print("Collecting TOS Snapshot at " + datetime(n.year, n.month, n.day,n.hour, n.minute, n.second).time().__str__())
         if not os.path.exists("C:\\logs\\" + n.date().__str__()):
             os.makedirs("C:\\logs\\" + n.date().__str__())
-        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\IMBAL_CIRC_1.log", "C:\\logs\\" + n.date().__str__())
-        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_1.log", "C:\\logs\\" + n.date().__str__())
-
-
-class SubmitMarketOrder:
-    """Submit Order based on the symbol"""
-    def __init__(self, symbol="CRON.TO", side="Buy", shares="100"):
-        print("Submitting 100 Share order for Symbol")
-        with urllib.request.urlopen('http://localhost:8080/ExecuteOrder?symbol=' + symbol +
-                                    '&ordername=TSX%20' + side + '%20SweepSOR%20Market%20ANON%20DAY' +
-                                    '&shares=' + shares) as response1:
-            html1: object = response1.read()
-            print("Submit Order Response : " + html1.__str__())
-
-
-class SellMarketOrder:
-    """Submit Order based on the symbol"""
-    def __init__(self, symbol="CRON.TO", shares="100"):
-        print("Sell " + shares + " Shares Market:" + symbol)
-        with urllib.request.urlopen('http://localhost:8080/ExecuteOrder?symbol=' + symbol +
-                                    '&ordername=TSX%20Sell->Short%20SweepSOR%20Market%20ANON%20DAY' +
-                                    '&shares=' + shares) as response1:
-            html1: object = response1.read()
-            print("API - Execute Order Response : " + html1.__str__())
-
-
-class BuyMarketOrder:
-    """Submit Order based on the symbol"""
-    def __init__(self, symbol="CRON.TO", shares="100"):
-        print("Buy " + shares + " Shares Market: " + symbol)
-        with urllib.request.urlopen('http://localhost:8080/ExecuteOrder?symbol=' + symbol +
-                                    '&ordername=TSX%20Buy%20SweepSOR%20Market%20DAY' +
-                                    '&shares=' + shares) as response1:
-            html1: object = response1.read()
-            print("API - Execute Order Response : " + html1.__str__())
-
-
-class SellFutures:
-    """Submit Futures Contract to sell based on the symbol and contract size, default is ES|M19.CM 1 Contract"""
-    def __init__(self, symbol="ES\M19.CM", shares="1"):
-        print("Sell " + shares + " Contract Market:" + symbol)
-        with urllib.request.urlopen('http://localhost:8080/ExecuteOrder?symbol=' + symbol +
-                                    '&ordername=CME%20Sell%20CME%20Market%20DAY' +
-                                    '&share=' + shares) as response1:
-            html1: object = response1.read()
-            print("API - Execute Order Response : " + html1.__str__())
-
-
-class BuyFutures:
-    """Submit Futures Contract to buy based on the symbol and contract size, default is ES|M19.CM 1 Contract"""
-    def __init__(self, symbol="ES\M19.CM", shares="1"):
-        print("Sell " + shares + " Contract Market:" + symbol)
-        with urllib.request.urlopen('http://localhost:8080/ExecuteOrder?symbol=' + symbol +
-                                    '&ordername=CME%20Buy%20CME%20Market%20DAY' +
-                                    '&share=' + shares) as response1:
-            html1: object = response1.read()
-            print("API - Execute Order Response : " + html1.__str__())
-
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Jawa\\IMBAL_CIRC_1.log", "C:\\logs\\" + n.date().__str__())
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Jawa\\TOS_1.log", "C:\\logs\\" + n.date().__str__())
 
 class LoadSymbols:
     """Load the Symbol File into the symbols data dictionaries"""
@@ -617,7 +558,7 @@ class ppro_datagram(DatagramProtocol):
 
 #L1=RegisterSymbol("CRON.TO", "L1", "5556")
 
-#TOS = RegisterSymbol("_STW60.E1", "TOS", "5556")
+#TOS = RegisterSymbol("_STW60.E1", "TOS", "55
 
 #reactor.listenUDP(5556, ppro_datagram())
 
