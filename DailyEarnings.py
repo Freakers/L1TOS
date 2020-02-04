@@ -3,15 +3,13 @@ import urllib.response
 import time
 import os
 import threading
-import unittest
-from twisted.internet import reactor
-from twisted.internet.protocol import DatagramProtocol
+import pandas as pd
+from datetime import date
 import pause
 import shutil
 from datetime import datetime
-from pathlib import Path
 
-class Symbols:
+class EarningsSymbols:
 
     def __init__(self, file, feedtype="TOS", output="bytype", loadtype="symbol"):
         print("Register Symbols File: " + file.__str__()+" Feed Type: TOS   Output To : BYTYPE")
@@ -21,7 +19,6 @@ class Symbols:
         if loadtype == "symbol":
             self.loadsymbol(file)
         self.registersymbols(feedtype, output)
-
 
     def setsymbols(self, record, sym):
         self.symbols[record] = sym
@@ -111,25 +108,50 @@ class Symbols:
 
     @staticmethod
     def main():
+        # Forcing Pandas to display max rows and columns.
+        pd.option_context('display.max_rows', None, 'display.max_columns', None)
+        # Reading the earnings calendar table on yahoo finance website.
+        nasdaq = pd.read_csv("NASDAQ.csv", names=['Symbol'])
+        nyse = pd.read_csv("NYSE.csv", names=['Symbol'])
+        earnings = pd.read_html('https://finance.yahoo.com/calendar/earnings')[0]
+        # print(str(earnings))
+        sym = pd.DataFrame(earnings)
+        count = sym['Symbol'].size
+        # print(count)
+        i = 0
+        daily_earnings = pd.DataFrame(columns=['Symbol'])
+        while i < count:
+            symbol = str(sym['Symbol'][i])
+            for a, nasadaq_symbol in nasdaq.iterrows():
+                #print(str(nasadaq_symbol[0]))
+                if symbol + ".NQ" == str(nasadaq_symbol[0]):
+                    daily_earnings = daily_earnings.append(
+                        {'Symbol': str(nasadaq_symbol[0])},
+                        ignore_index=True)
+                else:
+                    pass
+            i += 1
+        # Determine if the Symbol Trades on NYSE Exchange
+        i = 0
+        while i < count:
+            symbol = str(sym['Symbol'][i])
+            for a, nyse_symbol in nyse.iterrows():
+                #print(str(nyse_symbol[0]))
+                if symbol + ".NY" == str(nyse_symbol[0]):
+                    daily_earnings = daily_earnings.append(
+                        {'Symbol': str(nyse_symbol[0])},
+                        ignore_index=True)
+                else:
+                    pass
+            i += 1
+
+
+        # Writing to a CSV file.
+        daily_earnings.to_csv(r'Earnings_{}.csv'.format(date.today()), index=None, header=None)
         n = datetime.now()
         print(n.year.__str__() + n.month.__str__() + n.day.__str__())
-        test_Milan = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Milan.csv", "TOS", "bytype", "file")
-        test_Amsterdam = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Amsterdam.csv", "TOS", "bytype", "file")
-        test_Brusells = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Brussels.csv", "TOS", "bytype", "file")
-        test_Lisbon = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Lisbon.csv", "TOS", "bytype", "file")
-        test_Paris = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Paris.csv", "TOS", "bytype", "file")
-        pause.until(datetime(n.year, n.month, n.day, 11, 40, 00, 0))
-        if not os.path.exists(
-                "C:\\logs\\" + n.year.__str__() + "-" + n.month.__str__() + "-" + n.day.__str__().rjust(2, "0")):
-            os.mkdir("C:\\logs\\" + n.year.__str__() + "-" + n.month.__str__() + "-" + n.day.__str__().rjust(2, "0"))
-            shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_2.log", "C:\\logs\\" + n.year.__str__() +
-                        "-" + n.month.__str__() + "-" + n.day.__str__().rjust(2, "0") + "\\Europe.csv")
-if __name__ == '__main__':
-    Symbols.main()
+        EarningsSymbols(r'Earnings_{}.csv'.format(date.today()), "TOS", "5556", "file")
 
-#test_NASDAQ = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\NQ.csv", "TOS", "bytype", "file")
-#test_NYSE = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Nyse.csv", "TOS", "bytype", "file")
-# test_symbols = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Symbols.csv", "TOS", "bytype", "file")
-# test_symbols.listsymbols()
-#pause.until(datetime(n.year, n.month, n.day, 14, 00, 00, 0))
-#test_NASDAQ.movedata("TOS_1.log", "nq.log", 14, 20, 00)
+if __name__ == '__main__':
+    EarningsSymbols.main()
+
