@@ -123,10 +123,13 @@ class L2:
 
 
 class ppro_datagram(DatagramProtocol):
-    def __init__(self, s):
-        print("DatagramProtocol.s = " + str(s))
+    def __init__(self, s, starttime, endtime):
+        # Code to add widgets will go here...
         self.elapsedcounterstart = time.time()
         self.elapsedcountercurrent = time.time()
+        self.strttime = starttime
+        self.entime = endtime
+        self.triggertime = endtime + datetime.timedelta(seconds=60)
         self.counter = 0
         self.zero = 00.00
         self.rttos = TOS()
@@ -148,6 +151,8 @@ class ppro_datagram(DatagramProtocol):
         self.this_symbol = str(s)
         self.symbol = ""
         self.starttime = time.time()
+        self.min = 00.00
+        self.max = 00.00
 
     def setcurrentelapsedtime(self):
         self.elapsedcountercurrent = time.time()
@@ -162,6 +167,7 @@ class ppro_datagram(DatagramProtocol):
         print('starting up..')
 
     def datagramReceived(self, data, addr):
+        # Code to add widgets will go here...
         #self.elapsedtime()
         # decode byte data from UDP port into string, and replace spaces with NONE
         msg = data.decode("utf-8").replace(' ', 'NONE')
@@ -171,7 +177,7 @@ class ppro_datagram(DatagramProtocol):
 
         # when processing PPro8 data feeds, processing the line into a dictionary is very useful:
         for item in msg.split(','):
-            # print(item)
+            #print(item)
             if "=" in item:
                 couple = item.split('=')
                 message_dict[couple[0]] = couple[1]
@@ -179,35 +185,15 @@ class ppro_datagram(DatagramProtocol):
         # now you can call specific data by name in the line you're processing instead of counting colums
         # See the print statement below for examples
 
-        if message_dict['Message'] == "L1":
-            self.setcurrentelasedtime()
-            # self.symbol = message_dict['Symbol']
-            # if self.symbol == self.this_symbol.__str__():
-            #     self.bidpr = message_dict['BidPrice']
-            #     self.askpr = message_dict['AskPrice']
-            #     self.asksize = message_dict['AskSize']
-            #     self.bidsize = message_dict['BidSize']
-            #     self.time = message_dict['MarketTime']
-            #     # print("L1 Time: "+message_dict['MarketTime'] + " Symbol: " + message_dict['Symbol'])
-            #     # print("L1-> Bid Price:\t" + message_dict['BidPrice'] + "\tBid Size: " + message_dict['BidSize'])
-            #     # print("L1-> Ask Price:\t" + message_dict['AskPrice'] + "\tAsk Size: " + message_dict['AskSize'])
-            #     # print(self.time+"\tBid Price:\t" + self.bidpr + "\tBid Size:\t" + self.bidsize + "\tAsk Price:\t" +
-            #     #       self.askpr + "\tAsk Size:\t" + self.asksize)
-            #     # # x = 1
-            #     self.level1.update(message_dict['Symbol'], message_dict['BidPrice'], message_dict['AskPrice'],
-            #                        message_dict['BidSize'], message_dict['AskSize'], message_dict['MarketTime'])
-
-        # if message_dict['Message'] == "L2":
-        #     pass
-            #print("L2: " + message_dict.__str__())
-
-        if message_dict['Message'] == "TOS":
+        if message_dict['Message'] == "TOS" and datetime.datetime.now() >= self.strttime and datetime.datetime.now() < self.entime:
             self.symbol = message_dict['Symbol']
             if self.symbol == self.this_symbol.__str__():
-                #print('{}\t{}\t{}'.format(message_dict['Symbol'], message_dict['Message'], msg))
-                # When the time of sale appears update the current elapsed time
+                #print("This_Symbol      : " + self.this_symbol)
+                #print("In TOS for Symbol: " + message_dict['Symbol'])
+            #     print('{}\t{}\t{}'.format(message_dict['Symbol'], message_dict['Message'], msg))
+            #     # When the time of sale appears update the current elapsed time
                 self.setcurrentelapsedtime()
-                #    def update(self, localtime, market_time, symbol, tostype,  price, size):
+            #     def update(self, localtime, market_time, symbol, tostype,  price, size):
                 self.rttos.update(message_dict['LocalTime'],
                                   message_dict['MarketTime'],
                                   message_dict['Symbol'],
@@ -215,52 +201,36 @@ class ppro_datagram(DatagramProtocol):
                                   message_dict['Price'],
                                   message_dict['Size'],
                                   datetime.timedelta(0, self.getcurrentelapsedtime()).__str__().rjust(8, ' '))
-                if (self.getcurrentelapsedtime() >= 60 and self.getcurrentelapsedtime() <= 70) and \
-                        (float(message_dict['Price']) > self.rttos.high or float(message_dict['Price']) < self.rttos.low):
-                    print("Breakout: \n")
-                    self.rttos.list()
-                nn = datetime.datetime.now()
-                pause.until(datetime.datetime(nn.year, nn.month, nn.day, 15, 29, 10, 0))
-                try:
-                    if (self.getcurrentelapsedtime() >= 60 and self.getcurrentelapsedtime() <= 70) and \
-                            (float(message_dict['Price']) > self.rttos.high or float(message_dict['Price']) < self.rttos.low):
-                        pass
-                    else:
-                        print("No Breakout: \n")
-                        self.rttos.list()
-                except Exception as ex:
-                    print(ex)
-                    sys.exit(1)
-
+                #self.rttos.list()
+                if float(message_dict['Price']) > float(self.max):
+                    self.max = float(message_dict['Price'])
+                if float(message_dict['Price']) < float(self.min) or float(self.min) == float("00.00"):
+                    self.min = float(message_dict['Price'])
+                print("Max Price = " + str(self.max) + "  Min Price = " + str(self.min))
+        else:
+            if str(datetime.datetime.now()) < str(self.triggertime):
+                print("Current Price: " + message_dict['Price'] + " Max Price = " + str(self.max) + "  Min Price = " + str(self.min))
+                if self.symbol == self.this_symbol.__str__() and float(message_dict['Price']) > self.max:
+                    print("Triggered through upside")
+                if self.symbol == self.this_symbol.__str__() and float(message_dict['Price']) < self.min:
+                    print("Triggered through downside")
+            else:
+                print("No Trigger through MIN or MAX for " + self.symbol)
 
     def connectionRefused(self):
         print("No one listening")
 
-
-#
-# Change Log
-#
-n = datetime.datetime.now()
-pause.until(datetime.datetime(n.year, n.month, n.day, 15, 28, 00, 0))
-my_symbol = ""
-print("sys.argv.count = "+len(sys.argv).__str__())
-print("Symbol Used    = "+sys.argv[1])
-print("Data Type      = "+sys.argv[2])
-print("Symbol or File = "+sys.argv[3])
-
 if len(sys.argv) > 1:
     my_symbol = sys.argv[1].__str__()
     print("\nStarting L1TOS monitor for symbol: " + my_symbol.__str__())
-# Load and register symbols of intrest
-Symbols.Symbols(sys.argv[1], "TOS", "5556", "symbol")
-#SP500 11 Sectors
-#Symbols("C:\\logs\SP500_Sectors.txt")
-# Nikkei 225
-#Symbols("C:\\logs\\Nikkei225.csv")
-# Wait 5 seconds
-time.sleep(5)
-# Usage: reactor.listenUDP(_PORT_, ppro_datagram(_SYMBOL_))
-# Start listening on UDP _PORT_ 555 for message related to _SYMBOL_
-# Note: If the _SYMBOL_ is omitted it will default to ES\U19.CM
-reactor.listenUDP(5556, ppro_datagram(my_symbol))
+    # Load and register symbols of intrest
+    Symbols.Symbols(my_symbol, "TOS", "5556", "symbol")
+    # Note: If the _SYMBOL_ is omitted it will default to ES\U19.CM
+    #pause.until(datetime(n.year, n.month, n.day, 14, 30, 0, 0))
+
+n = datetime.datetime.now()
+print(n.year.__str__()+n.month.__str__()+n.day.__str__())
+reactor.listenUDP(5556, ppro_datagram(my_symbol,
+                                      datetime.datetime(n.year, n.month, n.day, 1, 0, 0, 0),
+                                      datetime.datetime(n.year, n.month, n.day, 18, 0, 0, 0)))
 reactor.run()

@@ -3,26 +3,21 @@ import urllib.response
 import time
 import os
 import threading
-import unittest
-from twisted.internet import reactor
-from twisted.internet.protocol import DatagramProtocol
+import pandas as pd
+from datetime import date
 import pause
 import shutil
 from datetime import datetime
-from pathlib import Path
 
-class Symbols:
+class EarningsSymbols:
 
-    def __init__(self, sym, feedtype="TOS", output="bytype", loadtype="symbol"):
-        print("Register Symbols File: " + sym)
-        print(" Feed Type: TOS   Output To : " + output)
+    def __init__(self, file, feedtype="TOS", output="bytype", loadtype="symbol"):
+        print("Register Symbols File: " + file.__str__()+" Feed Type: TOS   Output To : BYTYPE")
         self.symbols = {}
-        # if 'file' in loadtype:
-        #     print("Loading File")
-        #     self.loadsymbols(sym)
-        if "symbol" in loadtype:
-            print("Load Symbol " + sym)
-            self.loadsymbol(sym)
+        if loadtype == "file":
+            self.loadsymbols(file)
+        if loadtype == "symbol":
+            self.loadsymbol(file)
         self.registersymbols(feedtype, output)
 
     def setsymbols(self, record, sym):
@@ -35,21 +30,18 @@ class Symbols:
         return self.symbols.get(1).__str__()
 
     def registersymbols(self, feedtype="TOS", output="bytype"):
-        print("Starting THREADS to register L1 AND TOS for Symbol List")
         for record, symbol in self.symbols.items():
             print(symbol + " : "+feedtype+" : "+output)
             t = threading.Thread(target=self.registersymbol, args=(symbol, feedtype, output,))
             t.start()
-            pause.sleep(0.05)
+            pause.sleep(0.2)
 
     def registersyms(self, feedtype="TOS", output="bytype"):
-        print("Starting THREADS to register L1 AND TOS for Symbol List")
         for record, symbol in self.symbols.items():
             self.registersymbol(symbol, feedtype, output)
 
 
     def deregistersymbols(self):
-        print("Starting THREADS to deregister L1 AND TOS for Symbol List")
         for record, symbol in self.symbols.items():
             print(symbol)
             t = threading.Thread(target=self.deregistersymbol, args=(symbol, "TOS", "5556",))
@@ -65,7 +57,7 @@ class Symbols:
         with urllib.request.urlopen('http://localhost:8080/SetOutput?symbol=' + symbol +
                                     '&feedtype=' + feedType + '&output=' + output + '&status=on') as response2:
             html2: object = response2.read()
-            print("Register Output: " + html2.__str__())
+            print("Register Output Response: " + html2.__str__())
 
     def deregistersymbol(self, symbol, feedType, region, output):
         print('Deregister Symbol Request  : http://localhost:8080/Deregister?symbol=' + symbol + '&region=' +
@@ -103,8 +95,7 @@ class Symbols:
         return self.symbols.items().__len__()
 
     def movedata(self, feed, file, hour, minute, sec):
-        pause.until(datetime(n.year, n.month, n.day, 12, 00, 00, 0))
-        dte = datetime.now()
+        n, dte = datetime.now()
         pause.until(datetime(n.year, n.month, n.day, hour, minute, sec, 0))
         if not os.path.exists("C:\\logs\\" + dte.year.__str__() +
                               "-" + dte.month.__str__() + "-" + dte.day.__str__().rjust(2, "0")):
@@ -112,20 +103,51 @@ class Symbols:
         shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\" + feed, "C:\\logs\\" + dte.year.__str__() +
                     "-" + dte.month.__str__() + "-" + dte.day.__str__().rjust(2, "0") + "\\" + file)
 
-n = datetime.now()
-print(n.year.__str__()+n.month.__str__()+n.day.__str__())
-# test_Milan = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Milan.csv", "TOS", "bytype", "file")
-# test_Amsterdam = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Amsterdam.csv", "TOS", "bytype", "file")
-# test_Brusells = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Brussels.csv", "TOS", "bytype", "file")
-# test_Lisbon = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Lisbon.csv", "TOS", "bytype", "file")
-# test_Paris = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Paris.csv", "TOS", "bytype", "file")
-#test_NASDAQ = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Nasdaq.csv", "TOS", "bytype", "file")
-#test_NYSE = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Nyse.csv", "TOS", "bytype", "file")
-# test_symbols = Symbols("C:\\Users\\tctech\\PycharmProjects\\L1TOS\\Symbols.csv", "TOS", "bytype", "file")
-# test_symbols.listsymbols()
-# pause.until(datetime(n.year, n.month, n.day, 11, 40, 00, 0))
-# if not os.path.exists("C:\\logs\\"+n.year.__str__()+"-"+n.month.__str__()+"-"+n.day.__str__().rjust(2, "0")):
-#     os.mkdir("C:\\logs\\"+n.year.__str__()+"-"+n.month.__str__()+"-"+n.day.__str__().rjust(2, "0"))
-# shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\TOS_2.log", "C:\\logs\\"+n.year.__str__() +
-#             "-" + n.month.__str__() + "-" + n.day.__str__().rjust(2, "0") + "\\Europe.csv")
-# # test_NASDAQ.movedata("TOS_1", "Europe.log", "12", "22", "00")
+    @staticmethod
+    def main():
+        # Forcing Pandas to display max rows and columns.
+        pd.option_context('display.max_rows', None, 'display.max_columns', None)
+        # Reading the earnings calendar table on yahoo finance website.
+        nasdaq = pd.read_csv("NASDAQ.csv", names=['Symbol'])
+        nyse = pd.read_csv("NYSE.csv", names=['Symbol'])
+        earnings = pd.read_html('https://finance.yahoo.com/calendar/earnings')[0]
+        # print(str(earnings))
+        sym = pd.DataFrame(earnings)
+        count = sym['Symbol'].size
+        # print(count)
+        i = 0
+        daily_earnings = pd.DataFrame(columns=['Symbol'])
+        while i < count:
+            symbol = str(sym['Symbol'][i])
+            for a, nasadaq_symbol in nasdaq.iterrows():
+                #print(str(nasadaq_symbol[0]))
+                if symbol + ".NQ" == str(nasadaq_symbol[0]):
+                    daily_earnings = daily_earnings.append(
+                        {'Symbol': str(nasadaq_symbol[0])},
+                        ignore_index=True)
+                else:
+                    pass
+            i += 1
+        # Determine if the Symbol Trades on NYSE Exchange
+        i = 0
+        while i < count:
+            symbol = str(sym['Symbol'][i])
+            for a, nyse_symbol in nyse.iterrows():
+                #print(str(nyse_symbol[0]))
+                if symbol + ".NY" == str(nyse_symbol[0]):
+                    daily_earnings = daily_earnings.append(
+                        {'Symbol': str(nyse_symbol[0])},
+                        ignore_index=True)
+                else:
+                    pass
+            i += 1
+
+
+        # Writing to a CSV file.
+        daily_earnings.to_csv(r'Earnings_{}.csv'.format(date.today()), index=None, header=None)
+        n = datetime.now()
+        print(n.year.__str__() + n.month.__str__() + n.day.__str__())
+        EarningsSymbols(r'Earnings_{}.csv'.format(date.today()), "TOS", "5556", "file")
+
+if __name__ == '__main__':
+    EarningsSymbols.main()
