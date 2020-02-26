@@ -100,7 +100,7 @@ class EarningsSymbols:
         if not os.path.exists("C:\\logs\\" + dte.year.__str__() +
                               "-" + dte.month.__str__() + "-" + dte.day.__str__().rjust(2, "0")):
             os.mkdir("C:\\logs\\" + dte.year.__str__() + "-" + dte.month.__str__() + "-" + dte.day.__str__().rjust(2, "0"))
-        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Inka\\" + feed, "C:\\logs\\" + dte.year.__str__() +
+        shutil.copy("C:\\Program Files (x86)\\Ralota\\PPro8 Jawa\\" + feed, "C:\\logs\\" + dte.year.__str__() +
                     "-" + dte.month.__str__() + "-" + dte.day.__str__().rjust(2, "0") + "\\" + file)
 
     @staticmethod
